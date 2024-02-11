@@ -103,7 +103,9 @@ class RegistroProductosApp:
                     self.etiqueta_mensaje.config(text="Error al obtener el peso del COM5.", foreground="red")
                     return
 
-                if peso_actual_com5 == peso_calculado:
+                margen_tolerancia = 0.2
+
+                if abs(peso_actual_com5 - peso_calculado) <= margen_tolerancia:
                     if codigo_barras in self.productos_en_carrito:
                         self.productos_en_carrito[codigo_barras]['Cantidad'] += 1
                     else:
@@ -116,8 +118,6 @@ class RegistroProductosApp:
                     self.total_pagar.set(total_actual + precio)
 
                     self.peso_total += peso_producto
-
-                    #self.peso_actual_label.config(text=self.peso_total)
 
                     self.etiqueta_mensaje.config(text="")
 
@@ -186,7 +186,9 @@ class RegistroProductosApp:
             self.etiqueta_mensaje.config(text="Error al obtener el peso del COM5.", foreground="red")
             return False
 
-        if self.peso_total == self.peso_actual:
+        margen_tolerancia = 0.2
+
+        if abs(self.peso_total - self.peso_actual) <= margen_tolerancia:
             return True
         else:
             self.etiqueta_mensaje.config(text="No se puede finalizar la compra. Los pesos no coinciden.", foreground="red")
