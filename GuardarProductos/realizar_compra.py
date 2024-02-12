@@ -7,6 +7,10 @@ import serial
 
 import tkinter.messagebox as messagebox
 
+#Para instalar
+#pip install ttkthemes
+#pip install pyserial
+
 class RegistroProductosApp:
     def __init__(self, root):
         self.root = root
