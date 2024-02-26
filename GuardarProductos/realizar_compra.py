@@ -57,10 +57,16 @@ class RegistroProductosApp:
 
         ttk.Label(self.frame_principal, text="Código de Barras:").pack(pady=5)
         self.codigo_barras_var = tk.StringVar()
-        ttk.Entry(self.frame_principal, textvariable=self.codigo_barras_var, font=("Arial", 12)).pack(pady=5)
-        ttk.Button(self.frame_principal, text="Escanear Producto", command=self.solicitar_peso).pack(pady=10)
+        self.entry_codigo_barras = ttk.Entry(self.frame_principal, textvariable=self.codigo_barras_var, font=("Arial", 12))
+        self.entry_codigo_barras.pack(pady=5)
+        self.entry_codigo_barras.focus_set()
 
-        ttk.Button(self.frame_principal, text="Eliminar Producto", command=self.eliminar_producto_por_peso).pack(pady=5)
+        self.btn_escanear_producto = ttk.Button(self.frame_principal, text="Escanear Producto", command=self.solicitar_peso, state="normal")
+        self.btn_escanear_producto.pack(pady=10)
+        
+        #ttk.Button(self.frame_principal, text="Escanear Producto", command=self.solicitar_peso).pack(pady=10)
+
+        #ttk.Button(self.frame_principal, text="Eliminar Producto", command=self.eliminar_producto_por_peso).pack(pady=5)
 
         self.btn_finalizar_compra = ttk.Button(self.frame_principal, text="Finalizar Compra", command=self.finalizar_compra, state="disabled")
         self.btn_finalizar_compra.pack(pady=10)
@@ -126,12 +132,18 @@ class RegistroProductosApp:
                     self.etiqueta_mensaje.config(text="")
 
                     self.btn_finalizar_compra.config(state="active")
+
+                    self.entry_codigo_barras.focus_set()
+                    
                 else:
                     self.etiqueta_mensaje.config(text="El peso del producto no coincide con el esperado.", foreground="red")
+                    self.entry_codigo_barras.focus_set()
             else:
                 self.etiqueta_mensaje.config(text="Operación cancelada.", foreground="orange")
+                self.entry_codigo_barras.focus_set()
         else:
             self.etiqueta_mensaje.config(text="Producto no encontrado en la base de datos.", foreground="red")
+            self.entry_codigo_barras.focus_set()
 
     def eliminar_producto_por_peso(self):
         codigo_barras = simpledialog.askstring("Eliminar Producto por Peso", "Ingrese el código de barras del producto:")

@@ -53,6 +53,7 @@ class ProductoApp:
 
         self.leer_siguiente_codigo()
 
+        self.entry_codigo.focus_set()
 
     def inicializar_base_datos(self):
         self.conn = sqlite3.connect('productos.db')
@@ -93,6 +94,7 @@ class ProductoApp:
             self.entry_precio.delete(0, tk.END)
 
             self.leer_siguiente_codigo()
+            self.entry_codigo.focus_set()
         else:
             print(f"El código de barras {codigo_barras} ya existe en la base de datos.")
 
@@ -129,6 +131,7 @@ class ProductoApp:
         try:
             if self.serial_port.in_waiting > 0:
                 peso_serial = self.serial_port.readline().decode().strip()
+                print(peso_serial)
 
                 self.entry_peso.delete(0, tk.END)
                 self.entry_peso.insert(tk.END, peso_serial)
