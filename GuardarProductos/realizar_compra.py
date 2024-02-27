@@ -4,6 +4,7 @@ from ttkthemes import ThemedStyle
 import sqlite3
 from tkinter import simpledialog
 import serial
+from generar_ticket import Ticket
 
 import tkinter.messagebox as messagebox
 
@@ -16,6 +17,12 @@ class RegistroProductosApp:
         self.root = root
         self.root.title("Registro de Productos")
         self.root.geometry("800x700")
+
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (800 // 2)
+        y = (screen_height // 2) - (700 // 2) 
+        self.root.geometry(f"800x700+{x}+{y}")
 
         self.estilo = ThemedStyle(self.root)
         self.estilo.set_theme("plastik")
@@ -31,8 +38,11 @@ class RegistroProductosApp:
         self.conn = sqlite3.connect('productos.db')
         self.cursor = self.conn.cursor()
 
-        self.puerto_serial = serial.Serial('COM5', 9600)
-
+        #self.puerto_serial = serial.Serial('COM5', 9600)
+        self.puerto_serial = None
+        self.serial_read_id = None
+        self.abrir_puerto_serial()  
+        self.root.protocol("WM_DELETE_WINDOW", self.cerrar_puerto_serial)
         self.root.after(100, self.leer_puerto_serial)
 
     def configurar_interfaz(self):
@@ -71,6 +81,12 @@ class RegistroProductosApp:
         self.btn_finalizar_compra = ttk.Button(self.frame_principal, text="Finalizar Compra", command=self.finalizar_compra, state="disabled")
         self.btn_finalizar_compra.pack(pady=10)
 
+        self.btn_generar_ticket = ttk.Button(self.frame_principal, text="Generar ticket", command=self.generar_ticket)
+        self.btn_generar_ticket.pack(pady=10)
+
+        self.etiqueta_peso = ttk.Label(self.frame_principal, text="")
+        self.etiqueta_peso.pack(pady=10)
+
         self.etiqueta_mensaje = ttk.Label(self.frame_principal, text="")
         self.etiqueta_mensaje.pack(pady=10)
 
@@ -79,13 +95,32 @@ class RegistroProductosApp:
             if self.puerto_serial.in_waiting > 0:
                 peso_recibido = self.puerto_serial.readline().decode().strip()
                 self.peso_actual = float(peso_recibido)
-                print(self.peso_actual)
+                #print(self.peso_actual)
+                self.etiqueta_peso.config(text=f"Peso: {self.peso_actual}")
                 #self.peso_actual.set(float(peso_recibido))
 
         except serial.SerialException:
             print("Error al leer del puerto serial")
 
-        self.root.after(100, self.leer_puerto_serial)
+        self.serial_read_id = self.root.after(100, self.leer_puerto_serial)
+
+    def abrir_puerto_serial(self):
+        try:
+            print("Puerto conectado")
+            self.puerto_serial = serial.Serial('COM5', baudrate=9600, timeout=1)
+        except serial.SerialException as e:
+            print("Error al abrir el puerto serial:", e)
+    
+    def cerrar_puerto_serial(self):
+        if self.serial_read_id is not None:
+            self.root.after_cancel(self.serial_read_id)
+            print("Id serial desconectado")
+
+        if self.puerto_serial is not None and self.puerto_serial.is_open:
+            self.puerto_serial.close()
+            print("Puerto desconectado")
+
+        self.root.destroy()
 
     def solicitar_peso(self):
         codigo_barras = self.codigo_barras_var.get()
@@ -184,6 +219,19 @@ class RegistroProductosApp:
             self.etiqueta_mensaje.config(text="Compra finalizada. ¡Gracias por su compra!", foreground="green")
 
             self.btn_finalizar_compra.config(state="disabled")
+    
+    def generar_ticket(self):
+        detalles_venta = []
+        for codigo_barras, detalles in self.productos_en_carrito.items():
+            detalles_venta.append({
+                "cantidad": detalles["Cantidad"],
+                "descripcion": detalles["Nombre"],
+                "subtotal": detalles["Precio"] * detalles["Cantidad"]
+            })
+
+        ticket = Ticket(detalles_venta)
+        imagen_ticket = ticket.generar_imagen_ticket()
+        imagen_ticket.show()
 
     def actualizar_lista_productos(self):
         for item in self.lista_productos.get_children():

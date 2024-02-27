@@ -1,2 +1,4 @@
 ttkthemes
 pyserial
+qrcode
+python-escpos
