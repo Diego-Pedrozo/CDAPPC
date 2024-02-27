@@ -3,9 +3,16 @@ import sqlite3
 import serial
 
 class ProductoApp:
-    def __init__(self, root):
+    def __init__(self, root, ventana_principal):
+        self.ventana_principal = ventana_principal
         self.root = root
         self.root.title("Registrar Productos")
+
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (300 // 2)
+        y = (screen_height // 2) - (220 // 2) 
+        self.root.geometry(f"300x220+{x}+{y}")
 
         self.frame = tk.Frame(self.root, padx=30, pady=10)
         self.frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
@@ -47,8 +54,10 @@ class ProductoApp:
 
         self.inicializar_base_datos()
 
-        self.serial_port = serial.Serial('COM5', baudrate=9600, timeout=1)
-
+        self.serial_port = None
+        self.serial_read_id = None
+        self.abrir_puerto_serial()  
+        self.root.protocol("WM_DELETE_WINDOW", self.cerrar_puerto_serial)
         self.root.after(100, self.leer_puerto_serial)
 
         self.leer_siguiente_codigo()
@@ -95,6 +104,8 @@ class ProductoApp:
 
             self.leer_siguiente_codigo()
             self.entry_codigo.focus_set()
+
+            self.ventana_principal.cargar_productos()
         else:
             print(f"El código de barras {codigo_barras} ya existe en la base de datos.")
 
@@ -138,7 +149,25 @@ class ProductoApp:
         except serial.SerialException:
             print("Error al leer del puerto serial")
 
-        self.root.after(100, self.leer_puerto_serial)
+        self.serial_read_id = self.root.after(100, self.leer_puerto_serial)
+
+    def abrir_puerto_serial(self):
+        try:
+            print("Puerto conectado")
+            self.serial_port = serial.Serial('COM5', baudrate=9600, timeout=1)
+        except serial.SerialException as e:
+            print("Error al abrir el puerto serial:", e)
+    
+    def cerrar_puerto_serial(self):
+        if self.serial_read_id is not None:
+            self.root.after_cancel(self.serial_read_id)
+            print("Id serial desconectado")
+
+        if self.serial_port is not None and self.serial_port.is_open:
+            self.serial_port.close()
+            print("Puerto desconectado")
+
+        self.root.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()
