@@ -12,6 +12,8 @@ import tkinter.messagebox as messagebox
 #pip install ttkthemes
 #pip install pyserial
 
+tolerancia = 0.01  # Define un margen de tolerancia de +/- 10 gramos
+
 class RegistroProductosApp:
     def __init__(self, root):
         self.root = root
@@ -148,7 +150,7 @@ class RegistroProductosApp:
                     self.etiqueta_mensaje.config(text="Error al obtener el peso del COM5.", foreground="red")
                     return
 
-                margen_tolerancia = 0.2
+                margen_tolerancia = tolerancia 
 
                 if abs(peso_actual_com5 - peso_calculado) <= margen_tolerancia:
                     if codigo_barras in self.productos_en_carrito:
@@ -251,7 +253,7 @@ class RegistroProductosApp:
             self.etiqueta_mensaje.config(text="Error al obtener el peso del COM5.", foreground="red")
             return False
 
-        margen_tolerancia = 0.2
+        margen_tolerancia = tolerancia
 
         if abs(self.peso_total - self.peso_actual) <= margen_tolerancia:
             return True
