@@ -2,6 +2,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import uuid
+from escpos.printer import Usb
 
 class Ticket:
     def __init__(self, detalles_venta):
@@ -63,6 +64,23 @@ class Ticket:
         imagen.paste(qr_image, (100, 400))
 
         return imagen
+    
+    def imprimir(self):
+        try:
+            printer = Usb(0x0416, 0x5011) #configurar los valores VID y PID de la impresora
+
+            imagen_ticket = self.generar_imagen_ticket()
+
+            printer.image(imagen_ticket)
+
+            printer.cut()
+            
+            printer.close()
+
+            print("Ticket impreso exitosamente")
+
+        except Exception as e:
+            print(f"Error al imprimir el ticket: {str(e)}")
 
 # ticket = Ticket()
 # imagen_ticket = ticket.generar_imagen_ticket()

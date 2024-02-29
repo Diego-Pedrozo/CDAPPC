@@ -230,8 +230,9 @@ class RegistroProductosApp:
             })
 
         ticket = Ticket(detalles_venta)
-        imagen_ticket = ticket.generar_imagen_ticket()
-        imagen_ticket.show()
+        ticket.imprimir()
+        #imagen_ticket = ticket.generar_imagen_ticket()
+        #imagen_ticket.show()
 
     def actualizar_lista_productos(self):
         for item in self.lista_productos.get_children():
