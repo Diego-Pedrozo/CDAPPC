@@ -1,4 +1,4 @@
-import qrcode
+#import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import uuid
@@ -21,15 +21,15 @@ class Ticket:
         self.total = self.subtotal * 1.19
         
         self.texto_agradecimiento = "Gracias por su compra!"
-        self.codigo_qr = self.generar_codigo_qr()
+        #self.codigo_qr = self.generar_codigo_qr()
 
     def generar_numero_factura(self):
         numero_uuid = uuid.uuid4()
         numero_factura = abs(hash(numero_uuid))
         return numero_factura
 
-    def generar_codigo_qr(self):
-        return qrcode.make(f"Factura: {self.numero_factura}")
+    # def generar_codigo_qr(self):
+    #     return qrcode.make(f"Factura: {self.numero_factura}")
 
     def generar_imagen_ticket(self):
         imagen = Image.new("RGB", (400, 600), "white")
@@ -60,8 +60,8 @@ class Ticket:
         y += 40
         draw.text((20, y), self.texto_agradecimiento, fill="black", font=font_media)
 
-        qr_image = self.codigo_qr.resize((200, 200))
-        imagen.paste(qr_image, (100, 400))
+        #qr_image = self.codigo_qr.resize((200, 200))
+        #imagen.paste(qr_image, (100, 400))
 
         return imagen
     
