@@ -4,7 +4,6 @@ import sqlite3
 from productos import ProductoApp
 import serial
 
-
 class VisualizacionEdicionProductosApp:
     def __init__(self, root):
         self.root = root
@@ -32,7 +31,8 @@ class VisualizacionEdicionProductosApp:
         self.tree.heading("Precio", text="Precio")
         self.tree.bind("<Double-1>", self.ir_a_edicion)
         self.tree.pack(fill=tk.BOTH, expand=True)
-
+        
+        self.inicializar_base_datos()
         self.cargar_productos()
 
         # Frame de edición de productos
@@ -78,7 +78,24 @@ class VisualizacionEdicionProductosApp:
 
         self.boton_agregar = tk.Button(self.frame_edicion, text="Agregar Producto", command=self.app_agregar_productos)
         self.boton_agregar.grid(pady=7, column=0, columnspan=2)
-        
+    
+    def inicializar_base_datos(self):
+        self.conn = sqlite3.connect('productos.db')
+        self.cursor = self.conn.cursor()
+
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS productos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                codigo_barras TEXT,
+                nombre TEXT,
+                descripcion TEXT,
+                peso REAL,
+                precio REAL
+            )
+        ''')
+
+        self.conn.commit()
+
     def cargar_productos(self):
         self.tree.delete(*self.tree.get_children())
         conn = sqlite3.connect('productos.db')

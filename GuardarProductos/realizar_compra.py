@@ -8,10 +8,6 @@ from generar_ticket import Ticket
 
 import tkinter.messagebox as messagebox
 
-#Para instalar
-#pip install ttkthemes
-#pip install pyserial
-
 tolerancia = 0.01  # Define un margen de tolerancia de +/- 10 gramos
 
 class RegistroProductosApp:
@@ -40,7 +36,7 @@ class RegistroProductosApp:
         self.conn = sqlite3.connect('productos.db')
         self.cursor = self.conn.cursor()
 
-        #self.puerto_serial = serial.Serial('COM5', 9600)
+        self.puerto_serial = serial.Serial('/dev/ttyUSB0', 9600)
         self.puerto_serial = None
         self.serial_read_id = None
         self.abrir_puerto_serial()  
@@ -75,6 +71,8 @@ class RegistroProductosApp:
 
         self.btn_escanear_producto = ttk.Button(self.frame_principal, text="Escanear Producto", command=self.solicitar_peso, state="normal")
         self.btn_escanear_producto.pack(pady=10)
+
+        self.entry_codigo_barras.bind("<Return>", self.ejecutar_acccion_enter)
         
         #ttk.Button(self.frame_principal, text="Escanear Producto", command=self.solicitar_peso).pack(pady=10)
 
@@ -91,6 +89,9 @@ class RegistroProductosApp:
 
         self.etiqueta_mensaje = ttk.Label(self.frame_principal, text="")
         self.etiqueta_mensaje.pack(pady=10)
+    
+    def ejecutar_acccion_enter(self, event):
+        self.solicitar_peso()
 
     def leer_puerto_serial(self):
         try:
@@ -109,7 +110,7 @@ class RegistroProductosApp:
     def abrir_puerto_serial(self):
         try:
             print("Puerto conectado")
-            self.puerto_serial = serial.Serial('COM5', baudrate=9600, timeout=1)
+            self.puerto_serial = serial.Serial('/dev/ttyUSB0', baudrate=9600, timeout=1)
         except serial.SerialException as e:
             print("Error al abrir el puerto serial:", e)
     
@@ -126,6 +127,7 @@ class RegistroProductosApp:
 
     def solicitar_peso(self):
         codigo_barras = self.codigo_barras_var.get()
+        self.codigo_barras_var.set("")
 
         self.cursor.execute('''
             SELECT nombre, descripcion, precio, peso
@@ -233,8 +235,6 @@ class RegistroProductosApp:
 
         ticket = Ticket(detalles_venta)
         ticket.imprimir()
-        imagen_ticket = ticket.generar_imagen_ticket()
-        imagen_ticket.show()
 
     def actualizar_lista_productos(self):
         for item in self.lista_productos.get_children():
